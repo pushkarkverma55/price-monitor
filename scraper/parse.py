@@ -103,20 +103,21 @@ def extract_specs(title):
             break
     specs["brand"] = brand or t.split()[0]
 
-    m = re.search(r'\b(\d{1,2})\s*GB\b(?!\s*(?:SSD|HDD|eMMC|Storage|Graphics))', t, re.I)
+    # explicit "16GB RAM" wins; else first NGB not tied to storage/GPU VRAM
+    m = re.search(r'\b(\d{1,2})\s*GB\b(?:\s+(?:DDR\d\w*|LPDDR\d\w*))?\s+RAM\b', t, re.I)
+    if not m:
+        m = re.search(r'\b(\d{1,2})\s*GB\b(?!\s*(?:SSD|HDD|eMMC|Storage|Graphics|GDDR|VRAM|RTX|GTX|GPU))', t, re.I)
     specs["ram_gb"] = int(m.group(1)) if m else None
 
-    m = re.search(r'\b(\d+)\s*(TB|GB)\s*(?:PCIe\s+)?(?:NVMe\s+)?(SSD|HDD|eMMC|UFS|Storage)?', t, re.I)
-    storage = None
-    if m:
-        n, unit = int(m.group(1)), m.group(2).upper()
-        # skip if this matched the RAM token (same number, GB, no storage word after)
-        if not (specs["ram_gb"] and n == specs["ram_gb"] and unit == "GB" and not m.group(3)):
-            storage = f"{n}{unit}"
+    # storage needs an explicit storage word; fallback: slash-delimited "…/512GB" that isn't the RAM
+    m = re.search(r'\b(\d+)\s*(TB|GB)\s*(?:PCIe\s+)?(?:NVMe\s+)?(?:Gen\d\s+)?(?:SSD|HDD|eMMC|UFS|Storage)\b', t, re.I)
+    storage = f"{m.group(1)}{m.group(2).upper()}" if m else None
     if storage is None:
-        m2 = re.search(r'\b(\d+)\s*(TB|GB)\s*(SSD|HDD|eMMC|UFS)\b', t, re.I)
-        if m2:
-            storage = f"{m2.group(1)}{m2.group(2).upper()}"
+        for m2 in re.finditer(r'/\s*(\d+)\s*(TB|GB)\b(?!\s*(?:Graphics|GDDR|VRAM))', t, re.I):
+            n, unit = int(m2.group(1)), m2.group(2).upper()
+            if unit == "TB" or n >= 128:  # laptop storage, not RAM/VRAM sizes
+                storage = f"{n}{unit}"
+                break
     specs["storage"] = storage
     specs["storage_gb"] = (int(storage[:-2]) * (1024 if storage.endswith("TB") else 1)) if storage else None
 
@@ -131,6 +132,7 @@ def extract_specs(title):
     model = None
     if brand:
         after = re.split(rf'\b{re.escape(brand)}\b', t, maxsplit=1, flags=re.I)[-1].strip()
+        after = re.sub(r'^(Smartchoice|Smart\s*Choice|New|Latest)\s+', '', after, flags=re.I)
         words = []
         stop = re.compile(r'^(\(|\[|\d+GB|\d+TB|\d+(st|nd|rd|th)\b|Intel|AMD|Ryzen|Core\b|i[3579]\b|R[3579]\b|Snapdragon|Qualcomm|Celeron|MediaTek|with\b|Laptop\b|Thin\b|,)', re.I)
         for w in after.split():
