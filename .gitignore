@@ -1,0 +1,5 @@
+.venv/
+data/pricemonitor.db
+data/run.log
+dashboard/node_modules/
+.DS_Store

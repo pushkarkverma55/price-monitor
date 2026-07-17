@@ -1,0 +1,17 @@
+{
+  "search_queries": [
+    "lenovo ideapad slim 3 laptop",
+    "lenovo ideapad slim 5 laptop",
+    "lenovo thinkbook 16 laptop",
+    "lenovo loq gaming laptop",
+    "lenovo yoga slim 7 laptop"
+  ],
+  "allowed_brands": ["Lenovo"],
+  "max_search_results_per_query": 8,
+  "max_products": 200,
+  "min_delay_s": 3.0,
+  "max_delay_s": 6.0,
+  "page_timeout_ms": 60000,
+  "block_backoff_s": 45,
+  "max_block_retries": 2
+}
