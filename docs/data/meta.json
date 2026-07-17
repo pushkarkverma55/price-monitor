@@ -1,1 +1,1 @@
-{"runs": [{"id": 1, "started": 1784292578, "finished": 1784293104, "pages_fetched": 57, "products_snapshotted": 52, "new_products": 19, "errors": "[]"}]}
+{"runs": [{"id": 2, "started": 1784300319, "finished": 1784300350, "pages_fetched": 3, "products_snapshotted": 3, "new_products": 0, "errors": "[]"}, {"id": 1, "started": 1784292578, "finished": 1784293104, "pages_fetched": 57, "products_snapshotted": 52, "new_products": 19, "errors": "[]"}]}
